@@ -1,0 +1,265 @@
+<head>
+    <script
+			  src="https://code.jquery.com/jquery-3.4.1.min.js"
+			  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+              crossorigin="anonymous"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.10.1/Sortable.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <link rel="stylesheet" type="text/css" href="./style.css"></script>
+    <script>
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            ev.target.appendChild(document.getElementById(data));
+        }
+    </script>
+</head>
+<body>
+    <div>
+        <span id="total-length">
+            Min. length: 
+            <input id="total-length-input" type="text" disabled/>
+        </span>
+        <br/><br/>
+        <span id="title">
+            Title: 
+            <input id="title-input" type="text"/>
+        </span>
+        <br/><br/>
+        <span id="subtitle">
+            Subtitle: 
+            <input id="subtitle-input" type="text"/>
+        </span>
+        
+
+        <ul id="my-list" class="sortable">
+            <li hidden="hidden" id='exampleLine'>
+                <textarea></textarea>
+                <span class="spoken-length">
+                    Spoken length:</br>
+                    <input type="text" disabled class="spoken-length-input"/>
+                </span>
+                <span class="length-okay">
+                    Length okay:</br>
+                    <input type="text" disabled class="length-okay-input"/>
+                </span>
+                <span class="icondelete"></span>
+            </li>
+            <li>
+                <span class="iconhandle"></span>
+                <span class="counter">1</span>
+                <textarea></textarea>
+                <span class="spoken-length">
+                    Spoken length:</br>
+                    <input type="text" disabled class="spoken-length-input"/>
+                </span>
+                <span class="length-okay">
+                    Length okay:</br>
+                    <input type="text" disabled class="length-okay-input"/>
+                </span>
+                <span class="icondelete"></span>
+            </li>
+            <li>
+                <span class="iconhandle"></span>
+                <span class="counter">2</span>
+                <textarea></textarea>
+                <span class="spoken-length">
+                    Spoken length:</br>
+                    <input type="text" disabled class="spoken-length-input"/>
+                </span>
+                <span class="length-okay">
+                    Length okay:</br>
+                    <input type="text" disabled class="length-okay-input"/>
+                </span>
+                <span class="icondelete"></span>
+            </li>
+            <li>
+                <span class="iconhandle"></span>
+                <span class="counter">3</span>
+                <textarea></textarea>
+                <span class="spoken-length">
+                    Spoken length:</br>
+                    <input type="text" disabled class="spoken-length-input"/>
+                </span>
+                <span class="length-okay">
+                    Length okay:</br>
+                    <input type="text" disabled class="length-okay-input"/>
+                </span>
+                <span class="icondelete"></span>
+            </li>
+            
+        </ul>
+    </div>
+
+    <input type="button" value="Add line" onclick="addLine()"></input>
+    <br/><br/>
+    <input type="button" value="Download" onclick="download()"></input>
+
+    <script>
+        function display (seconds) {
+            const format = val => `0${Math.floor(val)}`.slice(-2)
+            const hours = seconds / 3600
+            const minutes = (seconds % 3600) / 60
+
+            return [hours, minutes, seconds % 60].map(format).join(':')
+        }
+
+        function count(){
+            $('span.counter').each(function(i){
+                var num = i+1;
+                $(this).html(num+'');
+            })
+        }
+
+        function calcMinLength(){
+            var total_length_elem = $('#total-length-input');
+            var total_length = 0;
+            $('.spoken-length-input').each(function(i){
+                if($(this).val() != ""){
+                    total_length += parseFloat($(this).val());
+                }
+            })
+            var title = $('#title-input').val();
+            if(title.trim() != ""){
+                total_length = total_length + 8;
+            }
+            total_length = display(total_length);
+            if(total_length.startsWith('00:')){
+                total_length = total_length.slice('3');
+            }
+            total_length_elem.val(total_length);
+        }
+
+        function initChange(){
+            $('textarea').change(function(evt){
+                var target = $(evt.currentTarget);
+                var listelement = target.parent();
+                var spoken_length_elem = $('.spoken-length-input', listelement);
+                var length_okay = $('.length-okay-input', listelement);
+                var val = target.val();
+                var spoken_length = val.trim().split(' ').length / 2.5 + 1;
+                if(spoken_length==1){
+                    spoken_length_elem.val('');
+                }else{
+                    spoken_length_elem.val(Math.round(spoken_length));
+                }
+
+                if(val.length>130){
+                    length_okay.val('too long');
+                }else{
+                    length_okay.val('ok');
+                }
+
+                calcMinLength();
+            })
+        }
+
+        function initDelete(){
+            $('.icondelete').click(function(evt){
+                var target = $(evt.currentTarget);
+                var listelement = target.parent();
+                listelement.remove();
+                calcMinLength();
+                count();
+            })
+        }
+
+        $('#my-list').sortable({
+            handle:'.iconhandle',
+            onEnd:function(){
+                count();
+            }
+        });
+        var mySortable = $('#my-list').sortable('widget');
+
+        $('#title-input').change(function(){
+            calcMinLength();
+        })
+
+        initChange();
+        initDelete();
+        count();
+
+        function addLine(){
+            var elem = $('#exampleLine').clone();
+            elem.removeAttr('hidden');
+            elem.removeAttr('id');
+            elem.prepend('<span class="counter">1</span> ');
+            elem.prepend('<span class="iconhandle"></span> ')
+            $('#my-list').append(elem);
+            count();
+            initChange();
+            initDelete();
+        }
+
+        function download(){
+            var a = window.document.createElement('a');
+            
+            var data = "";
+            var time = new Date();
+            time.setHours(0);
+            time.setMinutes(0);
+            time.setSeconds(0);
+            $('#my-list li').each(function(i){
+                if(i!=0){
+                    var counter = i - 1;
+                    data += counter + "\n";
+                    var hours = time.getHours();
+                    if(hours.toString().length==1){
+                        hours="0"+hours;
+                    }
+                    var minutes= time.getMinutes();
+                    if(minutes.toString().length==1){
+                        minutes="0"+minutes;
+                    }
+                    var seconds = time.getSeconds();
+                    if(seconds.toString().length==1){
+                        seconds="0"+seconds;
+                    }
+                    var startTime = hours+":"+minutes+":"+seconds+",000";
+                    var length = $('.spoken-length-input', this).val();
+                    time.setSeconds(time.getSeconds()+parseInt(length));
+                    hours = time.getHours();
+                    if(hours.toString().length==1){
+                        hours="0"+hours;
+                    }
+                    minutes= time.getMinutes();
+                    if(minutes.toString().length==1){
+                        minutes="0"+minutes;
+                    }
+                    seconds = time.getSeconds();
+                    if(seconds.toString().length==1){
+                        seconds="0"+seconds;
+                    }
+                    var endTime = hours+":"+minutes+":"+seconds+",000";
+                    data += startTime + " --> " + endTime + "\n";
+                    var text = $('textarea', this).val();
+                    data += text + "\n\n";
+                }
+            })
+
+            a.href = window.URL.createObjectURL(new Blob([data], {type: 'text/srt'}));
+
+            var subtitle = $('#subtitle-input').val();
+            var date = new Date();
+            var file_title = "raw_captions_"+subtitle+"_"+date.getFullYear()+"_"+date.getMonth()+"_"+date.getDay()
+            a.download = file_title;
+
+            // Append anchor to body.
+            document.body.appendChild(a);
+            a.click();
+
+            // Remove anchor from body
+            document.body.removeChild(a);
+        }
+        
+    </script>
+</body>

@@ -1,0 +1,58 @@
+.iconhandle{
+    cursor: grab; 
+    cursor: -webkit-grabbing;
+    background-image:url("listicon.png");
+    height: 15px;
+    width: 15px;
+    display: inline-block;
+    background-repeat: no-repeat; 
+}
+
+.icondelete{
+    cursor:pointer;
+    height:15px;
+    width:15px;
+    background-image:url("deleteicon.png");
+    display:inline-block;
+    background-image:no-repeat;
+    margin-left:15px;
+}
+
+#title-input, #subtitle-input{
+    width:300px;
+}
+
+li{
+    list-style-type:none;
+    
+}
+
+li:hover{
+    background-color:lightgrey;
+}
+
+.spoken-length{
+    display:inline-block;
+    margin-left:15px;
+}
+
+.spoken-length>input{
+    width:50px;
+}
+
+.length-okay{
+    display:inline-block;
+    margin-left:25px;
+}
+
+.length-okay>input{
+    width:75px;
+}
+
+textarea{
+    resize:none;
+}
+
+ul>li{
+    margin-top:10px;
+}
